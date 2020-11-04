@@ -1,13 +1,17 @@
 version: '3.8'
 
 services:
-  web:
+  api:
     build: SupportChat.API/
     restart: always
     volumes:
       - ./SupportChat.API:/app
-    ports:
-      - '5001:5001'
-      - '5022:22'
     env_file:
       - ./config/.env
+  proxy:
+    image: nginx:latest
+    volumes:
+      - ./config/nginx_supportChat.conf:/etc/nginx/nginx.conf
+    ports:
+      - '80:5000'
+      - '5022:5022'
