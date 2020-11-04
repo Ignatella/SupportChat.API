@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web:
+    build: SupportChat.API/
+    restart: always
+    volumes:
+      - ./SupportChat.API:/app
+    ports:
+      - '5001:5001'
+      - '5022:22'
+    env_file:
+      - ./config/.env
