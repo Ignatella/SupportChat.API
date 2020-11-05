@@ -7,13 +7,25 @@ services:
     volumes:
       - ./SupportChat.API:/app
     env_file:
-      - ./config/.env
+      - ./config/api.env
+    depends_on:
+      - proxy
+      - db
+  db:
+    image: postgres
+    restart: always
+    env_file:
+      - ./config/db.env
+    depends_on:
+      - proxy
   proxy:
     image: nginx:latest
+    restart: always
     volumes:
       - ./config/nginx_supportChat.conf:/etc/nginx/nginx.conf
       - ./keys/supportChat.crt:/var/ssl/supportChat.crt
       - ./keys/supportChat.key:/var/ssl/supportChat.key
     ports:
       - '443:443'
-      - '5022:5022'
+      - '5022:5022' #ssh port for develop purposes
+      - '5032:5032' #db port for develop purposes
