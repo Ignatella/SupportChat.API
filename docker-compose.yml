@@ -12,6 +12,8 @@ services:
     image: nginx:latest
     volumes:
       - ./config/nginx_supportChat.conf:/etc/nginx/nginx.conf
+      - ./keys/supportChat.crt:/var/ssl/supportChat.crt
+      - ./keys/supportChat.key:/var/ssl/supportChat.key
     ports:
-      - '80:5000'
+      - '443:443'
       - '5022:5022'
