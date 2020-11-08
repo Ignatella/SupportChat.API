@@ -1,6 +1,6 @@
 using System;
 
-namespace SupportChat.API
+namespace API
 {
     public class WeatherForecast
     {
