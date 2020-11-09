@@ -1,14 +1,16 @@
-﻿using IdentityServer4.Models;
+﻿using IdentityServer4;
+using IdentityServer4.Models;
 using System.Collections.Generic;
 
-namespace IS
+namespace IS.Configs
 {
     public static class Config
     {
         public static IEnumerable<IdentityResource> IdentityResources =>
             new IdentityResource[]
             {
-                new IdentityResources.OpenId()
+                //new IdentityResources.OpenId(),
+                //new IdentityResources.Profile()
             };
 
         public static IEnumerable<ApiScope> ApiScopes =>
@@ -30,8 +32,7 @@ namespace IS
                 {
                 ClientId = "client",
 
-                // no interactive user, use the clientid/secret for authentication
-                AllowedGrantTypes = GrantTypes.ClientCredentials,
+                AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
 
                 // secret for authentication
                 ClientSecrets =
@@ -40,7 +41,7 @@ namespace IS
                 },
 
                 // scopes that client has access to
-                AllowedScopes = { "SignalR" }
+                AllowedScopes = {"SignalR"}
                 }
             };
     }

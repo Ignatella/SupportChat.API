@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using IS.Data.Models;
 using Microsoft.Extensions.Hosting;
 using IS.Data;
+using IS.Configs;
 
 namespace IS
 {
@@ -45,7 +46,7 @@ namespace IS
 
             //.AddEntityFrameworkStores<ApplicationDbContext>()
             //.AddDefaultTokenProviders();
-
+            services.AddControllers();
 
             // configure identity server with in-memory stores, keys, clients and scopes
             services.AddIdentityServer()
@@ -55,7 +56,8 @@ namespace IS
                 .AddInMemoryIdentityResources(Config.IdentityResources)
                 .AddInMemoryApiResources(Config.ApiResources)
                 .AddInMemoryClients(Config.Clients)
-                .AddAspNetIdentity<AppUser>();
+                .AddAspNetIdentity<AppUser>()
+                .AddProfileService<IdentityProfileService>();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -67,16 +69,17 @@ namespace IS
 
             // uncomment if you want to add MVC
             //app.UseStaticFiles();
-            //app.UseRouting();
+            app.UseRouting();
 
+            // app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseIdentityServer();
 
             // uncomment, if you want to add MVC
             //app.UseAuthorization();
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapDefaultControllerRoute();
-            //});
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

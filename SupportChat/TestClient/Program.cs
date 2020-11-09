@@ -23,13 +23,18 @@ namespace TestClient
             }
 
             // request token
-            var tokenResponse = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+            var tokenResponse = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
             {
                 Address = disco.TokenEndpoint,
+                GrantType = "password",
+
                 ClientId = "client",
                 ClientSecret = "secret",
 
-                Scope = "SignalR"
+                Scope = "SignalR",
+
+                UserName = "alice",
+                Password = "Pass123$"
             });
 
             if (tokenResponse.IsError)
