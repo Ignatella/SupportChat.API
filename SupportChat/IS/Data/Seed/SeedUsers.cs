@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Is.Data.Seed
 {
-    public class SeedData
+    public static class SeedUsers
     {
         public static void EnsureSeedData(IServiceProvider serviceProvider)
         {

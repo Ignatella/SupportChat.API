@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Is.Data.Seed;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using System;
+using System.IO;
 
 namespace IS
 {
@@ -12,17 +15,6 @@ namespace IS
     {
         public static int Main(string[] args)
         {
-
-            //IHost host = CreateHostBuilder(args).Build();
-            //using (var scope = host.Services.CreateScope())
-            //{
-            //    var services = scope.ServiceProvider;
-
-            //    SeedData.EnsureSeedData(host.Services);
-            //}
-
-            //host.Run();
-
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -43,7 +35,28 @@ namespace IS
             try
             {
                 Log.Information("Starting host...");
-                CreateHostBuilder(args).Build().Run();
+
+                IHost host = CreateHostBuilder(args).Build();
+
+                using (var scope = host.Services.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+
+                    #region Seed IS Db Tables
+
+                    var config = services.GetRequiredService<IConfiguration>();
+                    bool seed = config.GetSection("Data").GetValue<bool>("Seed");
+                    if (seed)
+                    {
+                        SeedUsers.EnsureSeedData(host.Services);
+
+                        throw new InvalidDataException("Seed successfully. Turn of seeding in env.");
+                    }
+                    #endregion
+                }
+
+                host.Run();
+
                 return 0;
             }
             catch (Exception ex)

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
+using IdentityModel;
 using IS.Data.Models;
-using Microsoft.AspNetCore.Http;
+using IS.Dtos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace IS.Controllers
 {
@@ -16,21 +15,36 @@ namespace IS.Controllers
     {
         private readonly UserManager<AppUser> userManager;
         private readonly SignInManager<AppUser> signInManager;
+        private readonly IMapper mapper;
 
-        public LoginController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public LoginController(
+            UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManager,
+            IMapper mapper)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            this.mapper = mapper;
         }
-        [HttpGet]
-        public async Task<IActionResult> Get()
+
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterDto user) //ToDo: implement.
         {
-            var user = userManager.Users.First(u => u.Id == "d34017a8-337e-4f95-88de-f6b9739428b3");
+            var userToBeCreated = mapper.Map<AppUser>(user);
 
-            await signInManager.SignInAsync(user, true);
+            var result = await userManager.CreateAsync(userToBeCreated);
 
-            //var result = await signInManager.PasswordSignInAsync("alice", "Pass123$", false, false);
-            return Ok("nothing to return here");
+            result = userManager.AddClaimsAsync(userToBeCreated, new Claim[]
+            {
+                new Claim(JwtClaimTypes.NickName, user.KnownAs)
+            }).Result;
+
+            if (!result.Succeeded)
+            {
+                return BadRequest("An error occured while creating user. Try again.");
+            }
+
+            return NoContent();
         }
     }
 }

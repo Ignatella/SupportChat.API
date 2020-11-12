@@ -6,6 +6,7 @@
 *.min.css
 *.min.js
 *.map
+tempkey.jwk
 
 _build/
 _site/

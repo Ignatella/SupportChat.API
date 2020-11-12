@@ -4,10 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using IS.Data.Models;
 using Microsoft.Extensions.Hosting;
-using IS.Data;
 using IS.Configs;
+using IS.Data.Models;
+using IS.Data;
+using IS.Data.Seed;
+using IdentityServer4.Configuration;
+using System.Reflection;
+using AutoMapper;
+using System;
 
 namespace IS
 {
@@ -24,9 +29,16 @@ namespace IS
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             services.AddDbContext<DataContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddAutoMapper(typeof(DataContext).Assembly);
+            services.AddControllers();
+
+
+            #region Identity & Identity Server settings
 
             services.AddIdentity<AppUser, IdentityRole>(options =>
             {   // only for dev puproses
@@ -37,27 +49,39 @@ namespace IS
                 options.Password.RequireLowercase = false;
             })
                 .AddSignInManager<SignInManager<AppUser>>()
-                .AddEntityFrameworkStores<DataContext>();
+                .AddEntityFrameworkStores<DataContext>()
+                .AddDefaultTokenProviders();
 
-            //services.AddIdentity<AppUser, IdentityRole>()
-            //    .AddEntityFrameworkStores<DataContext>()
-            //    .AddDefaultTokenProviders();
+            var builder = services.AddIdentityServer(options =>
+            {
+                options.Events.RaiseErrorEvents = true;
+                options.Events.RaiseInformationEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseSuccessEvents = true;
+                options.UserInteraction.LoginUrl = "/Account/Login";
+                options.UserInteraction.LogoutUrl = "/Account/Logout";
+                options.Authentication = new AuthenticationOptions()
+                {
+                    CookieLifetime = TimeSpan.FromHours(10),
+                    CookieSlidingExpiration = true
+                };
+            })
+            .AddConfigurationStore(options =>
+            {
+                options.ConfigureDbContext = b => b.UseSqlite(Configuration.GetConnectionString("DefaultConnection"),
+                    sql => sql.MigrationsAssembly(migrationsAssembly));
+            })
+            .AddOperationalStore(options =>
+            {
+                options.ConfigureDbContext = b => b.UseSqlite(Configuration.GetConnectionString("DefaultConnection"),
+                    sql => sql.MigrationsAssembly(migrationsAssembly));
+                options.EnableTokenCleanup = true;
+            })
+            .AddDeveloperSigningCredential()
+            .AddProfileService<IdentityProfileService>()
+            .AddAspNetIdentity<AppUser>();
 
-
-            //.AddEntityFrameworkStores<ApplicationDbContext>()
-            //.AddDefaultTokenProviders();
-            services.AddControllers();
-
-            // configure identity server with in-memory stores, keys, clients and scopes
-            services.AddIdentityServer()
-                .AddDeveloperSigningCredential()
-                .AddInMemoryPersistedGrants()
-                .AddInMemoryApiScopes(Config.ApiScopes)
-                .AddInMemoryIdentityResources(Config.IdentityResources)
-                .AddInMemoryApiResources(Config.ApiResources)
-                .AddInMemoryClients(Config.Clients)
-                .AddAspNetIdentity<AppUser>()
-                .AddProfileService<IdentityProfileService>();
+            #endregion
         }
 
         public void Configure(IApplicationBuilder app)
@@ -65,17 +89,23 @@ namespace IS
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                #region nitialize Identity Server database tables
+
+                bool seed = Configuration.GetSection("Data").GetValue<bool>("Seed");
+                if (seed)
+                {
+                    SeedISTables.InitializeDatabase(app);
+                }
+
+                #endregion
             }
 
-            // uncomment if you want to add MVC
-            //app.UseStaticFiles();
             app.UseRouting();
 
             // app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseIdentityServer();
 
-            // uncomment, if you want to add MVC
-            //app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
