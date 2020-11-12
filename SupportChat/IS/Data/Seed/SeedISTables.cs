@@ -4,7 +4,6 @@ using IS.Configs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
 
 namespace IS.Data.Seed
 {
@@ -17,33 +16,40 @@ namespace IS.Data.Seed
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
 
                 var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+
                 context.Database.Migrate();
-                if (!context.Clients.Any())
-                {
-                    foreach (var client in Config.Clients)
-                    {
-                        context.Clients.Add(client.ToEntity());
-                    }
-                    context.SaveChanges();
-                }
 
-                if (!context.IdentityResources.Any())
-                {
-                    foreach (var resource in Config.IdentityResources)
-                    {
-                        context.IdentityResources.Add(resource.ToEntity());
-                    }
-                    context.SaveChanges();
-                }
 
-                if (!context.ApiResources.Any())
+                context.Clients.RemoveRange(context.Clients);
+                foreach (var client in Config.Clients)
                 {
-                    foreach (var resource in Config.ApiResources)
-                    {
-                        context.ApiResources.Add(resource.ToEntity());
-                    }
-                    context.SaveChanges();
+                    context.Clients.Add(client.ToEntity());
                 }
+                context.SaveChanges();
+
+
+                context.IdentityResources.RemoveRange(context.IdentityResources);
+                foreach (var resource in Config.IdentityResources)
+                {
+                    context.IdentityResources.Add(resource.ToEntity());
+                }
+                context.SaveChanges();
+
+
+                context.ApiResources.RemoveRange(context.ApiResources);
+                foreach (var resource in Config.ApiResources)
+                {
+                    context.ApiResources.Add(resource.ToEntity());
+                }
+                context.SaveChanges();
+
+
+                context.ApiScopes.RemoveRange(context.ApiScopes);
+                foreach (var scope in Config.ApiScopes)
+                {
+                    context.ApiScopes.Add(scope.ToEntity());
+                }
+                context.SaveChanges();
             }
         }
     }

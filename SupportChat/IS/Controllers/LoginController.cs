@@ -1,9 +1,8 @@
-﻿using System.Security.Claims;
+﻿using System;
 using System.Threading.Tasks;
-using AutoMapper;
-using IdentityModel;
 using IS.Data.Models;
 using IS.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,38 +12,41 @@ namespace IS.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-        private readonly UserManager<AppUser> userManager;
-        private readonly SignInManager<AppUser> signInManager;
-        private readonly IMapper mapper;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
         public LoginController(
             UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager,
-            IMapper mapper)
+            SignInManager<AppUser> signInManager)
         {
-            this.userManager = userManager;
-            this.signInManager = signInManager;
-            this.mapper = mapper;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult Get() //tmp method for dev.
+        {
+            Console.WriteLine(User.Identity.Name); 
+            return Ok("hello");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterDto user) //ToDo: implement.
+        public async Task<IActionResult> Login(LoginDto login)
         {
-            var userToBeCreated = mapper.Map<AppUser>(user);
+            var user = await _userManager.FindByNameAsync(login.Username.ToUpper());
 
-            var result = await userManager.CreateAsync(userToBeCreated);
+            if (user == null)
+                return BadRequest("Check your credentials.");
 
-            result = userManager.AddClaimsAsync(userToBeCreated, new Claim[]
+
+            var result = await _signInManager.PasswordSignInAsync(user, login.Password, login.RememberMe, false);
+            if (result.Succeeded)
             {
-                new Claim(JwtClaimTypes.NickName, user.KnownAs)
-            }).Result;
-
-            if (!result.Succeeded)
-            {
-                return BadRequest("An error occured while creating user. Try again.");
+                return NoContent();
             }
-
-            return NoContent();
+            
+            return BadRequest("Check your credentials.");
         }
     }
 }

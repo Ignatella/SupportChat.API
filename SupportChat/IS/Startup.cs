@@ -78,10 +78,11 @@ namespace IS
                 options.EnableTokenCleanup = true;
             })
             .AddDeveloperSigningCredential()
-            .AddProfileService<IdentityProfileService>()
+            .AddProfileService<IdentityProfileService>() //tmp
             .AddAspNetIdentity<AppUser>();
 
             #endregion
+
         }
 
         public void Configure(IApplicationBuilder app)
@@ -105,6 +106,7 @@ namespace IS
 
             // app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseIdentityServer();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

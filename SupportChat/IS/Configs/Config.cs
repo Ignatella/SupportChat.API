@@ -28,6 +28,18 @@ namespace IS.Configs
         public static IEnumerable<Client> Clients =>
             new Client[]
             {
+                //new Client
+                //{
+                //    ClientId = "tmpClient",
+
+                //    ClientSecrets =
+                //    {
+                //        new Secret("secret".Sha256())
+                //    },
+
+                //    AllowedGrantTypes = GrantTypes.HybridAndClientCredentials
+                //},
+
                 new Client
                 {
                 ClientId = "client",

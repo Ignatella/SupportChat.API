@@ -49,8 +49,7 @@ namespace IS
                     if (seed)
                     {
                         SeedUsers.EnsureSeedData(host.Services);
-
-                        throw new InvalidDataException("Seed successfully. Turn of seeding in env.");
+                        // throw new InvalidDataException("Seed successfully. Turn of seeding in env.");
                     }
                     #endregion
                 }
