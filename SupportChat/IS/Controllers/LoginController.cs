@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using IdentityServer4.Events;
+using IdentityServer4.Services;
 using IS.Data.Models;
 using IS.Dtos;
 using Microsoft.AspNetCore.Authorization;
@@ -14,13 +16,16 @@ namespace IS.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEventService _events;
 
         public LoginController(
             UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager)
+            SignInManager<AppUser> signInManager,
+            IEventService envents)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+           _events = envents;
         }
 
         [HttpGet]
@@ -32,7 +37,7 @@ namespace IS.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginDto login)
+        public async Task<IActionResult> Login (LoginDto login)
         {
             var user = await _userManager.FindByNameAsync(login.Username.ToUpper());
 
@@ -45,8 +50,10 @@ namespace IS.Controllers
             {
                 return NoContent();
             }
-            
-            return BadRequest("Check your credentials.");
+
+            await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName));
+
+            return BadRequest("tmp error message");
         }
     }
 }

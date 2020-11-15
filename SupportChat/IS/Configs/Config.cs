@@ -1,5 +1,4 @@
-﻿using IdentityServer4;
-using IdentityServer4.Models;
+﻿using IdentityServer4.Models;
 using System.Collections.Generic;
 
 namespace IS.Configs
@@ -10,7 +9,9 @@ namespace IS.Configs
             new IdentityResource[]
             {
                 new IdentityResources.OpenId(),
-                new IdentityResources.Profile()
+                new IdentityResources.Profile(),
+                new IdentityResources.Phone(),
+                new IdentityResource("test", "This is one test claim", new string[] {"test"})
             };
 
         public static IEnumerable<ApiScope> ApiScopes =>
@@ -28,17 +29,34 @@ namespace IS.Configs
         public static IEnumerable<Client> Clients =>
             new Client[]
             {
-                //new Client
-                //{
-                //    ClientId = "tmpClient",
+                new Client
+                {
+                    ClientId = "postman",
 
-                //    ClientSecrets =
-                //    {
-                //        new Secret("secret".Sha256())
-                //    },
+                    ClientSecrets =
+                    {
+                        new Secret("password".Sha256())
+                    },
 
-                //    AllowedGrantTypes = GrantTypes.HybridAndClientCredentials
-                //},
+                    AllowAccessTokensViaBrowser=true,
+                    RequireConsent = false,
+                    RequirePkce = false,
+
+                    RedirectUris =
+                    {
+                        "https://localhost:5002/signin-oidc"
+                    },
+
+                    AllowedGrantTypes = GrantTypes.Code,
+
+                    AllowedScopes = {
+                        "SignalR",
+                        "openid",
+                        "profile",
+                        "phone",
+                        "test",
+                    }
+                },
 
                 new Client
                 {
