@@ -48,7 +48,7 @@ namespace IS
                     bool seed = config.GetSection("Data").GetValue<bool>("Seed");
                     if (seed)
                     {
-                        SeedUsers.EnsureSeedData(host.Services);
+                        SeedIdentityTables.EnsureSeedData(host.Services);
                         // throw new InvalidDataException("Seed successfully. Turn of seeding in env.");
                     }
                     #endregion

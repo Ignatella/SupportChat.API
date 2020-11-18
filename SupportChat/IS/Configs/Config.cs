@@ -1,4 +1,5 @@
-﻿using IdentityServer4.Models;
+﻿using IdentityModel;
+using IdentityServer4.Models;
 using System.Collections.Generic;
 
 namespace IS.Configs
@@ -49,12 +50,12 @@ namespace IS.Configs
 
                     AllowedGrantTypes = GrantTypes.Code,
 
-                    AllowedScopes = {
+                    AllowedScopes = { //ToDo: implement not as strings
                         "SignalR",
                         "openid",
                         "profile",
                         "phone",
-                        "test",
+                        "test"
                     }
                 },
 

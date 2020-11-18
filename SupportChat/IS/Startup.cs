@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using IS.Configs;
 using IS.Data.Models;
 using IS.Data;
 using IS.Data.Seed;
@@ -13,6 +12,7 @@ using IdentityServer4.Configuration;
 using System.Reflection;
 using AutoMapper;
 using System;
+using IS.Configs;
 
 namespace IS
 {
@@ -32,7 +32,7 @@ namespace IS
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             services.AddDbContext<DataContext>(options =>
-                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddAutoMapper(typeof(DataContext).Assembly);
             services.AddControllers();
@@ -40,7 +40,7 @@ namespace IS
 
             #region Identity & Identity Server settings
 
-            services.AddIdentity<AppUser, IdentityRole>(options =>
+            services.AddIdentity<AppUser, AppRole>(options =>
             {   // only for dev puproses
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 0;
@@ -48,6 +48,9 @@ namespace IS
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
             })
+                .AddRoles<AppRole>()
+                .AddRoleManager<RoleManager<AppRole>>()
+                .AddRoleValidator<RoleValidator<AppRole>>()
                 .AddSignInManager<SignInManager<AppUser>>()
                 .AddEntityFrameworkStores<DataContext>()
                 .AddDefaultTokenProviders();
@@ -58,8 +61,8 @@ namespace IS
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
-                options.UserInteraction.LoginUrl = "/Account/Login";
-                options.UserInteraction.LogoutUrl = "/Account/Logout";
+                //options.UserInteraction.LoginUrl = "/Account/Login";
+                //options.UserInteraction.LogoutUrl = "/Account/Logout";
                 options.Authentication = new AuthenticationOptions()
                 {
                     CookieLifetime = TimeSpan.FromHours(10),
@@ -68,18 +71,18 @@ namespace IS
             })
             .AddConfigurationStore(options =>
             {
-                options.ConfigureDbContext = b => b.UseSqlite(Configuration.GetConnectionString("DefaultConnection"),
+                options.ConfigureDbContext = b => b.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"),
                     sql => sql.MigrationsAssembly(migrationsAssembly));
             })
             .AddOperationalStore(options =>
             {
-                options.ConfigureDbContext = b => b.UseSqlite(Configuration.GetConnectionString("DefaultConnection"),
+                options.ConfigureDbContext = b => b.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"),
                     sql => sql.MigrationsAssembly(migrationsAssembly));
                 options.EnableTokenCleanup = true;
             })
             .AddDeveloperSigningCredential()
-            .AddProfileService<IdentityProfileService>() //tmp
-            .AddAspNetIdentity<AppUser>();
+            .AddAspNetIdentity<AppUser>()
+            .AddProfileService<ProfileService>();
 
             #endregion
 

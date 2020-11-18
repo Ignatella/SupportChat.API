@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IS.Data.Models
 {
-    public class AppUser : IdentityUser
+    public class AppRole : IdentityRole
     {
-        public string UserAgent { get; set; }
-
         public ICollection<AppUserRole> UserRoles { get; set; }
     }
-}   
+}

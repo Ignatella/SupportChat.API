@@ -4,15 +4,16 @@ using System.Security.Claims;
 using IdentityModel;
 using IS.Data;
 using IS.Data.Models;
+using IS.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Is.Data.Seed
 {
-    public static class SeedUsers
+    public static class SeedIdentityTables
     {
-        public static void EnsureSeedData(IServiceProvider serviceProvider)
+        public static async void EnsureSeedData(IServiceProvider serviceProvider)
         {
             using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
@@ -20,6 +21,34 @@ namespace Is.Data.Seed
                 context.Database.Migrate();
 
                 var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+                var roleManager = scope.ServiceProvider.GetService<RoleManager<AppRole>>();
+
+                #region Drop Users and Roles
+                var users = await userMgr.Users.ToListAsync();
+                foreach (var user in users)
+                {
+                    await userMgr.DeleteAsync(user);
+                }
+
+                var roles = await roleManager.Roles.ToListAsync();
+                foreach (var role in roles)
+                {
+                    await roleManager.DeleteAsync(role);
+                }
+
+                #endregion
+
+                #region Seed Roles
+
+                foreach (var item in Enum.GetValues(typeof(IdentityRoles)))//ToDo: implement in right way
+                {
+                    await roleManager.CreateAsync(new AppRole { Name = item.ToString() });
+                }
+
+                #endregion
+
+                #region Seed Users
+                
                 var alice = userMgr.FindByNameAsync("alice").Result;
                 if (alice == null)
                 {
@@ -42,7 +71,15 @@ namespace Is.Data.Seed
                         new Claim(JwtClaimTypes.WebSite, "http://alice.com"),
                         new Claim(JwtClaimTypes.Address, @"{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }", IdentityServer4.IdentityServerConstants.ClaimValueTypes.Json)
                     }).Result;
-                    if (!result.Succeeded)
+
+                    var roleResult =  await userMgr.AddToRolesAsync(alice, new[] { 
+                        IdentityRoles.Member.ToString(),
+                        IdentityRoles.User_support_specialist.ToString(),
+                        IdentityRoles.Admin.ToString(),
+                        IdentityRoles.SuperAdmin.ToString()
+                    });
+
+                    if (!result.Succeeded || !roleResult.Succeeded)
                     {
                         throw new Exception(result.Errors.First().Description);
                     }
@@ -76,7 +113,10 @@ namespace Is.Data.Seed
                         new Claim(JwtClaimTypes.Address, @"{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }", IdentityServer4.IdentityServerConstants.ClaimValueTypes.Json),
                         new Claim("location", "somewhere")
                     }).Result;
-                    if (!result.Succeeded)
+
+                    var roleResult = await userMgr.AddToRoleAsync(bob, IdentityRoles.Member.ToString());
+
+                    if (!result.Succeeded || !roleResult.Succeeded)
                     {
                         throw new Exception(result.Errors.First().Description);
                     }
@@ -86,6 +126,8 @@ namespace Is.Data.Seed
                 {
                     Console.WriteLine("bob already exists");
                 }
+
+                #endregion
             }
         }
     }
