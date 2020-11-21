@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AnonymousId.AspNetCore.Identity.Anonymous;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace SignalR
@@ -39,7 +39,6 @@ namespace SignalR
                    };
                });
 
-            // adds an authorization policy to make sure the token is for scope 'api1'
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("SignalR", policy =>
@@ -50,7 +49,6 @@ namespace SignalR
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -61,6 +59,11 @@ namespace SignalR
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAnonymousId(new AnonymousIdCookieOptionsBuilder()
+                .SetCustomCookieName("User_Anon")
+                .SetCustomCookieRequireSsl(true)
+                .SetCustomCookieHttpOnly(true));
 
             app.UseAuthentication();
             app.UseAuthorization();

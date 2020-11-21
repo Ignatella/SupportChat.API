@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AnonymousId.AspNetCore.Identity.Anonymous;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -42,7 +43,12 @@ namespace SignalR.Controllers
         public IEnumerable<WeatherForecast> GetAnon()
         {
             Console.WriteLine(User.Identity.Name);
-
+            IAnonymousIdFeature feature = HttpContext.Features.Get<IAnonymousIdFeature>();
+            if (feature != null)
+            {
+                string anonymousId = feature.AnonymousId;
+                Console.WriteLine(anonymousId);
+            }
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
