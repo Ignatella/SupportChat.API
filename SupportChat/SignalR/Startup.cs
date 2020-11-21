@@ -7,10 +7,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using SignalR.Data;
+using SignalR.Data.Repositories;
+using SignalR.Interfaces;
 
 namespace SignalR
 {
@@ -23,10 +27,16 @@ namespace SignalR
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddSignalR();
+
+            services.AddDbContext<DataContext>(options =>
+                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddScoped<IMessageRepository, MessageRepository>();
 
             services.AddAuthentication("Bearer")
                .AddJwtBearer("Bearer", options =>
@@ -71,6 +81,7 @@ namespace SignalR
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                //endpoints.MapHub<PresenceHub>("hubs/presence");
             });
         }
     }
