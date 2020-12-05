@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AnonymousId.AspNetCore.Identity.Anonymous;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -15,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using SignalR.Data;
 using SignalR.Data.Repositories;
 using SignalR.Interfaces;
+using SignalR.SignalR;
 
 namespace SignalR
 {
@@ -70,18 +70,13 @@ namespace SignalR
 
             app.UseRouting();
 
-            app.UseAnonymousId(new AnonymousIdCookieOptionsBuilder()
-                .SetCustomCookieName("User_Anon")
-                .SetCustomCookieRequireSsl(true)
-                .SetCustomCookieHttpOnly(true));
-
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                //endpoints.MapHub<PresenceHub>("hubs/presence");
+                endpoints.MapHub<PresenceHub>("hubs/presence");
             });
         }
     }

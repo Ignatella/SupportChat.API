@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AnonymousId.AspNetCore.Identity.Anonymous;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,7 +12,7 @@ namespace SignalR.Controllers
     [Route("api/[controller]/[action]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
+        private static readonly string[] _summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
@@ -26,35 +26,31 @@ namespace SignalR.Controllers
 
         [HttpGet]
         [Authorize]
-        public IEnumerable<WeatherForecast> Get()
+        public IActionResult Get()
         {
+            // Console.WriteLine(User.FindFirst(ClaimTypes.NameIdentifier).Value); 
+            
+
             var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            return Ok(Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
+                Summary = _summaries[rng.Next(_summaries.Length)]
             })
-            .ToArray();
+            .ToArray());
         }
-
 
         [HttpGet]
         public IEnumerable<WeatherForecast> GetAnon()
         {
             Console.WriteLine(User.Identity.Name);
-            IAnonymousIdFeature feature = HttpContext.Features.Get<IAnonymousIdFeature>();
-            if (feature != null)
-            {
-                string anonymousId = feature.AnonymousId;
-                Console.WriteLine(anonymousId);
-            }
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
+                Summary = _summaries[rng.Next(_summaries.Length)]
             })
             .ToArray();
         }

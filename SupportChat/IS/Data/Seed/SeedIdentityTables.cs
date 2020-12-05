@@ -72,12 +72,9 @@ namespace Is.Data.Seed
                         new Claim(JwtClaimTypes.Address, @"{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }", IdentityServer4.IdentityServerConstants.ClaimValueTypes.Json)
                     }).Result;
 
-                    var roleResult =  await userMgr.AddToRolesAsync(alice, new[] { 
-                        IdentityRoles.Member.ToString(),
-                        IdentityRoles.User_support_specialist.ToString(),
-                        IdentityRoles.Admin.ToString(),
-                        IdentityRoles.SuperAdmin.ToString()
-                    });
+
+                    var roleResult = await userMgr.AddToRolesAsync(alice,
+                         Enum.GetValues(typeof(IdentityRoles)).Cast<IdentityRoles>().Select(r => r.ToString()));
 
                     if (!result.Succeeded || !roleResult.Succeeded)
                     {

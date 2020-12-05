@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IS.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("identity/[controller]")]
     [ApiController]
     public class LoginController : ControllerBase
     {
@@ -25,7 +25,7 @@ namespace IS.Controllers
         {
             _userManager = userManager;
             _signInManager = signInManager;
-           _events = envents;
+            _events = envents;
         }
 
         [HttpGet]
@@ -48,10 +48,9 @@ namespace IS.Controllers
             var result = await _signInManager.PasswordSignInAsync(user, login.Password, login.RememberMe, false);
             if (result.Succeeded)
             {
+                await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName));
                 return NoContent();
             }
-
-            await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName));
 
             return BadRequest("tmp error message");
         }

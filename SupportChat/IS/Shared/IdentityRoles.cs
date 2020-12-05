@@ -7,8 +7,9 @@ namespace IS.Shared
 {
     public enum IdentityRoles
     {
+        AnonymousUser,
         Member,
-        User_support_specialist,
+        UserSupportSpecialist,
         Admin,
         SuperAdmin
     }
