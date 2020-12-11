@@ -8,5 +8,7 @@ namespace IS.Data.Models
         public string UserAgent { get; set; }
 
         public ICollection<AppUserRole> UserRoles { get; set; }
+
+        public ICollection<AppUserAnonymousId> UserAnonymousIds { get; set; }
     }
 }   

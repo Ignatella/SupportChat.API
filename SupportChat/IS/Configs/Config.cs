@@ -32,6 +32,27 @@ namespace IS.Configs
             {
                 new Client
                 {
+                    ClientId = "supportChatSpa",
+                    ClientName = "Support Chat Spa",
+                    AllowedGrantTypes = GrantTypes.Code,
+                    RequireClientSecret = false,
+
+                    RedirectUris =           { "https://localhost:5003/callback.html" },
+                    // PostLogoutRedirectUris = { "https://localhost:5003/index.html" },
+                    AllowedCorsOrigins =     { "https://localhost:4200" },
+
+                    AllowedScopes =
+                    {
+                        "SignalR",
+                        "openid",
+                        "profile",
+                        "phone",
+                        "test"
+                    }
+                },
+
+                new Client
+                {
                     ClientId = "postman",
 
                     ClientSecrets =

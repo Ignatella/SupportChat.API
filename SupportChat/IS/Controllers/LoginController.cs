@@ -1,10 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using IdentityServer4.Events;
 using IdentityServer4.Services;
 using IS.Data.Models;
 using IS.Dtos;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,14 +24,6 @@ namespace IS.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _events = envents;
-        }
-
-        [HttpGet]
-        [Authorize]
-        public IActionResult Get() //tmp method for dev.
-        {
-            Console.WriteLine(User.Identity.Name); 
-            return Ok("hello");
         }
 
         [HttpPost]

@@ -21,6 +21,9 @@ namespace IS.Data
                 .HasForeignKey(u => u.UserId)
                 .IsRequired();
 
+            builder.Entity<AppUser>()
+                .HasMany(u => u.UserAnonymousIds);
+
             builder.Entity<AppRole>()
                 .HasMany(r => r.UserRoles)
                 .WithOne(r => r.Role)

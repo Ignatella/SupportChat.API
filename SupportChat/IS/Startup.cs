@@ -13,6 +13,7 @@ using System.Reflection;
 using AutoMapper;
 using System;
 using IS.Configs;
+using IdentityServer4;
 
 namespace IS
 {
@@ -84,8 +85,16 @@ namespace IS
             .AddAspNetIdentity<AppUser>()
             .AddProfileService<ProfileService>();
 
-            #endregion
+            services.AddAuthentication()
+                .AddGoogle("Google", options =>
+                {
+                    options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
 
+                    options.ClientId = System.Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
+                    options.ClientSecret = System.Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET");
+                });
+
+            #endregion
         }
 
         public void Configure(IApplicationBuilder app)
