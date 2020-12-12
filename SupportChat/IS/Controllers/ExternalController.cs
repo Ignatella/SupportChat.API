@@ -25,10 +25,12 @@ namespace IdentityServerHost.Quickstart.UI
     [ApiController]
     public class ExternalController : Controller
     {
-        private readonly TestUserStore _users;
+        // private readonly TestUserStore _users;
+
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly ILogger<ExternalController> _logger;
+        private readonly UserManager<AppUser> _userManager;
         private readonly IEventService _events;
 
         public ExternalController(
@@ -42,10 +44,11 @@ namespace IdentityServerHost.Quickstart.UI
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
             //_users = users ?? new TestUserStore(TestUsers.Users);
-            _users = users; /*?? new TestUserStore(userManager.Users);*/
+
             _interaction = interaction;
             _clientStore = clientStore;
             _logger = logger;
+            _userManager = userManager;
             _events = events;
         }
 
@@ -109,7 +112,14 @@ namespace IdentityServerHost.Quickstart.UI
                 // this might be where you might initiate a custom workflow for user registration
                 // in this sample we don't show how that would be done, as our sample implementation
                 // simply auto-provisions new external user
-                user = AutoProvisionUser(provider, providerUserId, claims);
+                // user = AutoProvisionUser(provider, providerUserId, claims);
+                var user = new AppUser()
+                {
+                    Email = result.Principal.
+                }
+                //_userManager.CreateAsync
+
+
             }
 
             // this allows us to collect any additional claims or properties
@@ -139,16 +149,6 @@ namespace IdentityServerHost.Quickstart.UI
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
             await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.SubjectId, user.Username, true, context?.Client.ClientId));
 
-            //if (context != null)
-            //{
-            //    if (context.IsNativeClient())
-            //    {
-            //        // The client is native, so this change in how to
-            //        // return the response is for better UX for the end user.
-            //        return this.LoadingPage("Redirect", returnUrl);
-            //    }
-            //}
-
             return Redirect(returnUrl);
         }
 
@@ -176,11 +176,11 @@ namespace IdentityServerHost.Quickstart.UI
             return (user, provider, providerUserId, claims);
         }
 
-        private TestUser AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims)
-        {
-            var user = _users.AutoProvisionUser(provider, providerUserId, claims.ToList());
-            return user;
-        }
+        //private TestUser AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims)
+        //{
+        //    var user = _users.AutoProvisionUser(provider, providerUserId, claims.ToList());
+        //    return user;
+        //}
 
         // if the external login is OIDC-based, there are certain things we need to preserve to make logout work
         // this will be different for WS-Fed, SAML2p or other protocols

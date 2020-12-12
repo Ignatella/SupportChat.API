@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using IdentityServer4.Events;
 using IdentityServer4.Services;
+using IdentityServerHost.Quickstart.UI;
 using IS.Data.Models;
 using IS.Dtos;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IS.Controllers
 {
+    [SecurityHeaders]
     [Route("identity/[controller]")]
     [ApiController]
     public class LoginController : ControllerBase

@@ -1,4 +1,5 @@
 ﻿using IdentityServer4;
+using IdentityServerHost.Quickstart.UI;
 using IS.Shared;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -6,6 +7,7 @@ using System.Security.Claims;
 
 namespace IS.Controllers
 {
+    [SecurityHeaders]
     [Route("identity/[controller]")]
     [ApiController]
     public class AnonymousController : ControllerBase
